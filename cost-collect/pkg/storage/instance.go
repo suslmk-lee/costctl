@@ -69,33 +69,72 @@ func (s *InstanceStateStorage) SaveToFile(filename string) error {
 func (s *InstanceStateStorage) UpdateInstance(newInstance *InstanceState) {
 	existingInstance, ok := s.Instances[newInstance.ID]
 	if !ok {
-		// 새로운 인스턴스
-		newHistoryItem := StatusHistoryItem{
-			Status:     newInstance.CurrentStatus,
-			PowerState: newInstance.CurrentPowerState,
-			Timestamp:  newInstance.LastUpdated,
-		}
-		newInstance.StatusHistory = []StatusHistoryItem{newHistoryItem}
+		// 새로운 인스턴스 - updated 시간 기반 히스토리 생성
+		s.createInitialHistory(newInstance)
+		s.limitHistorySize(newInstance)
 		s.Instances[newInstance.ID] = newInstance
 		return
 	}
 
 	// 기존 인스턴스 업데이트
+	s.updateExistingInstance(existingInstance, newInstance)
+	s.limitHistorySize(existingInstance)
+}
+
+// createInitialHistory는 새로운 인스턴스의 초기 히스토리를 생성합니다.
+// updated 시간이 created 시간과 다르면 이전 상태를 추론합니다.
+func (s *InstanceStateStorage) createInitialHistory(instance *InstanceState) {
+	history := []StatusHistoryItem{}
+	
+	// updated 시간이 created 시간과 다르면 상태 변경이 있었음을 의미
+	if !instance.LastUpdated.Equal(instance.CreatedAt) && 
+	   instance.LastUpdated.After(instance.CreatedAt.Add(1*time.Minute)) {
+		
+		// 이전 상태 추론: 현재 상태의 반대 상태로 가정
+		var previousStatus string
+		var previousPowerState int
+		
+		if instance.CurrentStatus == "ACTIVE" {
+			previousStatus = "SHUTOFF"
+			previousPowerState = 4
+		} else {
+			previousStatus = "ACTIVE" 
+			previousPowerState = 1
+		}
+		
+		// 이전 상태를 created 시간에 추가
+		previousHistoryItem := StatusHistoryItem{
+			Status:     previousStatus,
+			PowerState: previousPowerState,
+			Timestamp:  instance.CreatedAt,
+		}
+		history = append(history, previousHistoryItem)
+	}
+	
+	// 현재 상태 추가
+	currentHistoryItem := StatusHistoryItem{
+		Status:     instance.CurrentStatus,
+		PowerState: instance.CurrentPowerState,
+		Timestamp:  instance.LastUpdated,
+	}
+	history = append(history, currentHistoryItem)
+	
+	instance.StatusHistory = history
+}
+
+// updateExistingInstance는 기존 인스턴스를 업데이트합니다.
+func (s *InstanceStateStorage) updateExistingInstance(existingInstance, newInstance *InstanceState) {
+	// LastUpdated 시간 비교로 실제 상태 변경 감지
+	isRealUpdate := newInstance.LastUpdated.After(existingInstance.LastUpdated)
+	
+	// 기존 인스턴스 정보 업데이트
 	existingInstance.CurrentStatus = newInstance.CurrentStatus
 	existingInstance.CurrentPowerState = newInstance.CurrentPowerState
 	existingInstance.LastUpdated = newInstance.LastUpdated
 
-	// 히스토리 추가 로직
-	shouldAddHistory := true
-	if len(existingInstance.StatusHistory) > 0 {
-		lastHistory := existingInstance.StatusHistory[len(existingInstance.StatusHistory)-1]
-		if lastHistory.Status == newInstance.CurrentStatus && lastHistory.PowerState == newInstance.CurrentPowerState {
-			// 상태 변경이 없으면 히스토리를 추가하지 않음
-			shouldAddHistory = false
-		}
-	}
-
-	if shouldAddHistory {
+	// updated 시간이 실제로 변경된 경우에만 히스토리 추가
+	// (API의 updated 시간이 변경되었다는 것은 실제 상태 변경이 있었음을 의미)
+	if isRealUpdate {
 		newHistoryItem := StatusHistoryItem{
 			Status:     newInstance.CurrentStatus,
 			PowerState: newInstance.CurrentPowerState,
@@ -103,10 +142,13 @@ func (s *InstanceStateStorage) UpdateInstance(newInstance *InstanceState) {
 		}
 		existingInstance.StatusHistory = append(existingInstance.StatusHistory, newHistoryItem)
 	}
+}
 
-	// 히스토리를 최신 3개로 제한
-	if len(existingInstance.StatusHistory) > 3 {
-		existingInstance.StatusHistory = existingInstance.StatusHistory[len(existingInstance.StatusHistory)-3:]
+// limitHistorySize는 인스턴스의 히스토리를 최신 3개로 제한합니다.
+func (s *InstanceStateStorage) limitHistorySize(instance *InstanceState) {
+	const maxHistorySize = 3
+	if len(instance.StatusHistory) > maxHistorySize {
+		instance.StatusHistory = instance.StatusHistory[len(instance.StatusHistory)-maxHistorySize:]
 	}
 }
 

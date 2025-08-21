@@ -19,6 +19,7 @@ type NHNCloudConfig struct {
 	Password    string `json:"password"`
 	Region      string `json:"region"`
 	IdentityURL string `json:"identity_url"`
+	ComputeURL  string `json:"compute_url"`
 }
 
 type MonitorConfig struct {

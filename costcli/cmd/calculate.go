@@ -97,6 +97,21 @@ func outputTable(summary *calculator.CostSummary) error {
 		fmt.Println()
 	}
 
+	// 총계 요약 다시 표시
+	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+	fmt.Printf("=== 💰 총 비용 요약 ===\n")
+	fmt.Printf("📅 계산 기간: %s ~ %s\n", summary.Period.StartTime.In(kst).Format("2006-01-02 15:04"), summary.Period.EndTime.In(kst).Format("2006-01-02 15:04"))
+	fmt.Printf("🖥️  총 인스턴스: %d개\n", summary.TotalInstances)
+	fmt.Printf("💵 기본 비용: %.2f %s\n", summary.TotalBaseCost, summary.Currency)
+	fmt.Printf("🎟️  총 할인: %.2f %s\n", summary.TotalDiscount, summary.Currency)
+	fmt.Printf("🏷️  최종 비용: %.2f %s\n", summary.TotalFinalCost, summary.Currency)
+	
+	if summary.TotalDiscount > 0 {
+		discountRate := (summary.TotalDiscount / summary.TotalBaseCost) * 100
+		fmt.Printf("📊 할인율: %.1f%%\n", discountRate)
+	}
+	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
 	return nil
 }
 

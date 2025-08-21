@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cost-collect/pkg/config"
+	"cost-collect/pkg/nhncloud"
 	"cost-collect/pkg/storage"
 )
 
@@ -21,6 +22,7 @@ type Stats struct {
 type Monitor struct {
 	config          *config.Config
 	instanceStorage *storage.InstanceStateStorage
+	nhnClient       *nhncloud.Client
 	stats           Stats
 	ticker          *time.Ticker
 	done            chan bool
@@ -33,9 +35,12 @@ func NewMonitor(cfg *config.Config) *Monitor {
 		log.Printf("경고: 기존 인스턴스 데이터 로딩 실패 (%s): %v", cfg.Storage.InstanceFile, err)
 	}
 
+	nhnClient := nhncloud.NewClient(&cfg.NHNCloud)
+
 	return &Monitor{
 		config:          cfg,
 		instanceStorage: storage,
+		nhnClient:       nhnClient,
 		done:            make(chan bool),
 	}
 }
@@ -86,12 +91,17 @@ func (m *Monitor) GetStats() Stats {
 func (m *Monitor) update() {
 	log.Println("데이터를 수집하고 업데이트합니다...")
 
-	// 1. Fetch data from cloud provider (Simulated)
-	// In a real implementation, this would be a call to NHN Cloud API
-	simulatedInstances := m.simulateFetchFromCloud()
+	// 1. Fetch data from NHN Cloud API
+	instances, err := m.nhnClient.GetInstances()
+	if err != nil {
+		log.Printf("오류: NHN Cloud API에서 데이터를 가져오지 못했습니다: %v", err)
+		return
+	}
+
+	log.Printf("NHN Cloud API에서 %d개의 인스턴스를 가져왔습니다.", len(instances))
 
 	// 2. Update instance storage
-	for _, instance := range simulatedInstances {
+	for _, instance := range instances {
 		m.instanceStorage.UpdateInstance(instance)
 	}
 
@@ -103,7 +113,8 @@ func (m *Monitor) update() {
 	// 4. Recalculate summary stats
 	m.recalculateStats()
 
-	log.Printf("업데이트 완료. 총 %d개 인스턴스.", m.stats.TotalInstances)
+	log.Printf("업데이트 완료. 총 %d개 인스턴스 (실행 중: %d개, 정지: %d개)", 
+		m.stats.TotalInstances, m.stats.RunningInstances, m.stats.ShutdownInstances)
 }
 
 func (m *Monitor) recalculateStats() {
@@ -121,28 +132,3 @@ func (m *Monitor) recalculateStats() {
 	m.stats.LastUpdate = time.Now()
 }
 
-// simulateFetchFromCloud simulates fetching instance data from the cloud.
-func (m *Monitor) simulateFetchFromCloud() []*storage.InstanceState {
-	// This is a placeholder. It should be replaced with actual API calls.
-	// We'll create a dummy instance for demonstration.
-	return []*storage.InstanceState{
-		{
-			ID:                "fe37386d-f2aa-451c-8590-83dc45601a3c",
-			Name:              "karmada-host1",
-			FlavorID:          "edc79d63-98c3-4b77-a2d4-482d70e6b554",
-			CurrentStatus:     "ACTIVE",
-			CurrentPowerState: 1,
-			CreatedAt:         time.Now().Add(-48 * time.Hour),
-			LastUpdated:       time.Now(),
-		},
-		{
-			ID:                "2c45b048-189a-4d50-adc4-826542472476",
-			Name:              "ImageHubGw",
-			FlavorID:          "a4b6a0f7-aeff-4d78-a8d5-7de9f007012d",
-			CurrentStatus:     "SHUTOFF",
-			CurrentPowerState: 4,
-			CreatedAt:         time.Now().Add(-100 * time.Hour),
-			LastUpdated:       time.Now(),
-		},
-	}
-}
