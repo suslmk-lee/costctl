@@ -82,7 +82,7 @@ func outputTable(summary *calculator.CostSummary) error {
 
 	for _, instance := range summary.InstanceCosts {
 		fmt.Printf("인스턴스: %s (%s)\n", instance.InstanceName, instance.InstanceID)
-		fmt.Printf("  - Flavor: %s (%.2f %s/시간)\n", instance.FlavorID, instance.BaseHourlyRate, summary.Currency)
+		fmt.Printf("  - Flavor: %s (%.2f %s/시간)\n", instance.FlavorName, instance.BaseHourlyRate, summary.Currency)
 		fmt.Printf("  - 실행 시간: %.2f시간\n", instance.TotalRunningHours)
 		fmt.Printf("  - 기본 비용: %.2f %s\n", instance.BaseCost, summary.Currency)
 		fmt.Printf("  - 할인: %.2f %s\n", instance.TotalDiscount, summary.Currency)

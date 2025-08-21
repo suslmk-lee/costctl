@@ -1,0 +1,283 @@
+{
+  "version": "2.0.0",
+  "last_updated": "2025-08-21T17:45:00+09:00",
+  "default_csp": "nhn",
+  "csps": {
+    "nhn": {
+      "name": "NHN Cloud",
+      "display_name": "NHN Cloud",
+      "api_url": "https://api-identity-infrastructure.nhncloudservice.com",
+      "default_currency": "KRW",
+      "regions": [
+        {
+          "code": "KR1",
+          "name": "Korea (Pangyo)",
+          "display_name": "한국 (판교)"
+        },
+        {
+          "code": "KR2", 
+          "name": "Korea (Pyeongchon)",
+          "display_name": "한국 (평촌)"
+        }
+      ],
+      "instance_types": {
+        "db51400e-85a1-4d65-930a-52d1d40941a9": {
+          "id": "db51400e-85a1-4d65-930a-52d1d40941a9",
+          "name": "m1.c2m4",
+          "display_name": "Standard 2vCPU 4GB",
+          "vcpu": 2,
+          "memory_mb": 4096,
+          "disk_gb": 20,
+          "network_performance": "moderate",
+          "pricing": {
+            "KRW": {
+              "hourly": 120.0,
+              "monthly": 86400.0,
+              "yearly": 1036800.0
+            }
+          },
+          "availability": ["KR1", "KR2"]
+        },
+        "edc79d63-98c3-4b77-a2d4-482d70e6b554": {
+          "id": "edc79d63-98c3-4b77-a2d4-482d70e6b554",
+          "name": "m1.c4m8",
+          "display_name": "Standard 4vCPU 8GB",
+          "vcpu": 4,
+          "memory_mb": 8192,
+          "disk_gb": 20,
+          "network_performance": "high",
+          "pricing": {
+            "KRW": {
+              "hourly": 240.0,
+              "monthly": 172800.0,
+              "yearly": 2073600.0
+            }
+          },
+          "availability": ["KR1", "KR2"]
+        },
+        "a4b6a0f7-aeff-4d78-a8d5-7de9f007012d": {
+          "id": "a4b6a0f7-aeff-4d78-a8d5-7de9f007012d",
+          "name": "m1.c1m2",
+          "display_name": "Standard 1vCPU 2GB",
+          "vcpu": 1,
+          "memory_mb": 2048,
+          "disk_gb": 20,
+          "network_performance": "low",
+          "pricing": {
+            "KRW": {
+              "hourly": 80.0,
+              "monthly": 57600.0,
+              "yearly": 691200.0
+            }
+          },
+          "availability": ["KR1", "KR2"]
+        },
+        "8339613a-2837-4c72-906b-a8a47aa17c3f": {
+          "id": "8339613a-2837-4c72-906b-a8a47aa17c3f",
+          "name": "m1.c8m16",
+          "display_name": "Standard 8vCPU 16GB",
+          "vcpu": 8,
+          "memory_mb": 16384,
+          "disk_gb": 20,
+          "network_performance": "very_high",
+          "pricing": {
+            "KRW": {
+              "hourly": 480.0,
+              "monthly": 345600.0,
+              "yearly": 4147200.0
+            }
+          },
+          "availability": ["KR1", "KR2"]
+        }
+      },
+      "discount_rules": [
+        {
+          "id": "nhn_shutdown_90day",
+          "name": "NHN 인스턴스 셧다운 90일 할인",
+          "description": "인스턴스 생성 후 90일 이내에 셧다운 시 90% 할인",
+          "type": "shutdown",
+          "conditions": [
+            {
+              "type": "instance_age_days",
+              "operator": "<=",
+              "value": 90
+            }
+          ],
+          "discount_percent": 90.0,
+          "effective_from": "2025-01-01T00:00:00Z",
+          "effective_to": null,
+          "enabled": true
+        },
+        {
+          "id": "long_term_discount",
+          "name": "장기 사용 할인",
+          "description": "30일 이상 연속 사용 시 10% 할인",
+          "type": "long_term",
+          "conditions": [
+            {
+              "type": "running_hours",
+              "operator": ">=",
+              "value": 720
+            }
+          ],
+          "discount_percent": 10.0,
+          "effective_from": "2025-01-01T00:00:00Z",
+          "effective_to": null,
+          "enabled": true
+        }
+      ]
+    },
+    "naver": {
+      "name": "Naver Cloud Platform",
+      "display_name": "네이버 클라우드 플랫폼",
+      "api_url": "https://ncloud.apigw.ntruss.com",
+      "default_currency": "KRW",
+      "regions": [
+        {
+          "code": "KR-1",
+          "name": "Korea (Seoul)",
+          "display_name": "한국 (서울)"
+        },
+        {
+          "code": "KR-2",
+          "name": "Korea (Chuncheon)", 
+          "display_name": "한국 (춘천)"
+        }
+      ],
+      "instance_types": {
+        "SVR.VSVR.AMD.STAND.C002.M008.G003": {
+          "id": "SVR.VSVR.AMD.STAND.C002.M008.G003",
+          "name": "Standard",
+          "display_name": "Standard 2vCPU 8GB",
+          "vcpu": 2,
+          "memory_mb": 8192,
+          "disk_gb": 50,
+          "network_performance": "moderate",
+          "pricing": {
+            "KRW": {
+              "hourly": 86.0,
+              "monthly": 61920.0,
+              "yearly": 743040.0
+            }
+          },
+          "availability": ["KR-1", "KR-2"]
+        }
+      },
+      "discount_rules": [
+        {
+          "id": "volume_discount",
+          "name": "볼륨 할인",
+          "description": "월 사용량에 따른 할인",
+          "type": "volume",
+          "conditions": [
+            {
+              "type": "monthly_hours",
+              "operator": ">=",
+              "value": 500
+            }
+          ],
+          "discount_percent": 5.0,
+          "effective_from": "2025-01-01T00:00:00Z",
+          "effective_to": null,
+          "enabled": true
+        }
+      ]
+    },
+    "aws": {
+      "name": "Amazon Web Services",
+      "display_name": "AWS",
+      "api_url": "https://ec2.amazonaws.com",
+      "default_currency": "USD",
+      "regions": [
+        {
+          "code": "us-east-1",
+          "name": "US East (N. Virginia)",
+          "display_name": "미국 동부 (버지니아 북부)"
+        },
+        {
+          "code": "ap-northeast-2",
+          "name": "Asia Pacific (Seoul)",
+          "display_name": "아시아 태평양 (서울)"
+        }
+      ],
+      "instance_types": {
+        "t3.micro": {
+          "id": "t3.micro",
+          "name": "t3.micro",
+          "display_name": "t3.micro (2vCPU 1GB)",
+          "vcpu": 2,
+          "memory_mb": 1024,
+          "disk_gb": 8,
+          "network_performance": "low_to_moderate",
+          "pricing": {
+            "USD": {
+              "hourly": 0.0104,
+              "monthly": 7.488,
+              "yearly": 91.104
+            },
+            "KRW": {
+              "hourly": 13.52,
+              "monthly": 9734.4,
+              "yearly": 118435.2
+            }
+          },
+          "availability": ["us-east-1", "ap-northeast-2"]
+        },
+        "m5.large": {
+          "id": "m5.large",
+          "name": "m5.large",
+          "display_name": "m5.large (2vCPU 8GB)",
+          "vcpu": 2,
+          "memory_mb": 8192,
+          "disk_gb": 8,
+          "network_performance": "up_to_10_gigabit",
+          "pricing": {
+            "USD": {
+              "hourly": 0.096,
+              "monthly": 69.12,
+              "yearly": 840.96
+            },
+            "KRW": {
+              "hourly": 124.8,
+              "monthly": 89856.0,
+              "yearly": 1093248.0
+            }
+          },
+          "availability": ["us-east-1", "ap-northeast-2"]
+        }
+      },
+      "discount_rules": []
+    }
+  },
+  "global_settings": {
+    "cache_ttl_seconds": 3600,
+    "default_duration": "1h",
+    "supported_formats": ["table", "json", "yaml"],
+    "currency_conversion": {
+      "rates": {
+        "USD_to_KRW": 1300.0,
+        "JPY_to_KRW": 8.7
+      },
+      "last_updated": "2025-08-21T17:45:00+09:00"
+    }
+  },
+  "global_discount_rules": [
+    {
+      "id": "early_termination",
+      "name": "조기 종료 할인",
+      "description": "1시간 미만 사용 시 최소 과금 면제",
+      "type": "early_termination",
+      "conditions": [
+        {
+          "type": "running_minutes",
+          "operator": "<",
+          "value": 60
+        }
+      ],
+      "discount_percent": 100.0,
+      "effective_from": "2025-01-01T00:00:00Z",
+      "effective_to": null,
+      "enabled": true
+    }
+  ]
+}
